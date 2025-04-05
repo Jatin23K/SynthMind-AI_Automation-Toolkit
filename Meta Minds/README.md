@@ -1,7 +1,7 @@
-# AI-Powered Data Analysis Tool
+# AI Questioning Tool
 
 ## Overview
-This project is an intelligent data analysis tool that leverages AI agents to analyze and compare datasets. It uses OpenAI's language models through the CrewAI framework to provide deep insights into data structures, generate analytical questions, and compare multiple datasets.
+This project is an questioning tool that leverages AI agents to analyze and compare datasets. It uses OpenAI's language models through the CrewAI framework to provide deep insights into data structures, generate analytical questions, and compare multiple datasets.
 
 ## Key Features
 - **Multi-Format Support**: Reads CSV, Excel, and JSON files
