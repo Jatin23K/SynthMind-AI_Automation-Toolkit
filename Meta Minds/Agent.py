@@ -37,41 +37,30 @@ client = OpenAI()
 # Generate Descriptions Using GPT
 # ==========================
 def generate_column_descriptions(data):
-    """This function sends sample values from each column to GPT
-    so it can describe what the column likely represents."""
     descriptions = {}
-
     for column in data.columns:
         sample_values = data[column].dropna().astype(str).head(3).tolist()
         sample_text = ", ".join(sample_values)
-
-        # Create a custom instruction for GPT
         prompt = (
             f"Column name: {column}\n"
             f"Sample values: {sample_text}\n"
             f"Based on the column name and sample values, write a short, clear description of this column:"
         )
-
         try:
-            # Ask GPT to describe this column
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}]
             )
             descriptions[column] = response.choices[0].message.content.strip()
         except Exception as e:
             logging.error(f"Failed to generate description for '{column}': {e}")
             descriptions[column] = f"Sample values: {sample_text}"
-
     return descriptions
 
 # ==========================
 # Load the Dataset
 # ==========================
 def read_file(file_path):
-    """This reads your file and turns it into a data table Python can work with"""
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".csv":
         return pd.read_csv(file_path)
@@ -86,7 +75,6 @@ def read_file(file_path):
 # Create Summary (Rows, Columns, Descriptions)
 # ==========================
 def generate_summary(df):
-    """Creates a summary of your dataset: row/column count + column descriptions"""
     meta = {
         "rows": len(df),
         "columns": len(df.columns),
@@ -95,16 +83,16 @@ def generate_summary(df):
     descriptions = generate_column_descriptions(df)
     for col in df.columns:
         meta["column_info"][col] = {
-            "dtype": str(df[col].dtype),  # The type of data in the column (e.g., numbers, text)
-            "description": descriptions[col]  # Description from GPT
+            "dtype": str(df[col].dtype),
+            "description": descriptions[col]
         }
     return meta
+
 
 # ==========================
 # Define CrewAI Agents
 # ==========================
 def create_agents():
-    """These are your AI team members with specific roles"""
     schema_sleuth = Agent(
         role="Schema Sleuth",
         goal="Analyze data and describe schema",
@@ -123,7 +111,6 @@ def create_agents():
 # Define Tasks for Agents
 # ==========================
 def create_tasks(data, name, agent1, agent2):
-    """Each agent gets a task with specific instructions"""
     analyze_task = Task(
         description=f"""Analyze the dataset '{name}' and produce metadata including row/column count,
         column data types, and purpose of each column.
@@ -147,36 +134,37 @@ def create_tasks(data, name, agent1, agent2):
 # Main Function (Entry Point)
 # ==========================
 def main():
-    """This is what runs when you launch the program"""
     file_path = input("Enter the full path of your dataset (CSV, XLSX, or JSON): ").strip()
     df = read_file(file_path)
     schema_sleuth, question_genius = create_agents()
     tasks = create_tasks(df, os.path.basename(file_path), schema_sleuth, question_genius)
 
-    # Create the AI crew with our agents and tasks
     crew = Crew(
         agents=[schema_sleuth, question_genius],
         tasks=tasks,
         verbose=True,
-        process=Process.sequential  # Run one after the other
+        process=Process.sequential
     )
 
     logging.info("🚀 Starting Meta Minds Analysis...\n")
-    result = crew.kickoff()  # Begin the task execution
-    summary = generate_summary(df)  # Create a summary from the dataset
+    result = crew.kickoff()
+    summary = generate_summary(df)
 
-    # Print results to the screen
-    print("\n====== DATA SUMMARY ======")
-    print(f"Rows: {summary['rows']}")
-    print(f"Columns: {summary['columns']}")
+    # Save output to a text file
+    output_lines = ["====== DATA SUMMARY ======", f"Rows: {summary['rows']}", f"Columns: {summary['columns']}", ""]
     for col, info in summary["column_info"].items():
-        print(f"\n{col} ({info['dtype']}):\n  {info['description']}")
+        output_lines.append(f"{col} ({info['dtype']}): {info['description']}")
+    output_lines.append("\n====== GENERATED QUESTIONS ======")
+    if isinstance(result, list):
+        for q in result:
+            output_lines.append(f"- {q}")
+    else:
+        output_lines.append(str(result))
 
-    print("\n====== GENERATED QUESTIONS ======")
-    print(result)
+    with open("meta_output.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(output_lines))
 
-# ==========================
-# Run the Program
-# ==========================
+    print("\n✅ Meta Minds output saved to 'meta_output.txt'")
+
 if __name__ == "__main__":
     main()
