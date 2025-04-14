@@ -29,8 +29,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 if not os.getenv("OPENAI_API_KEY"):
     os.environ["OPENAI_API_KEY"] = "sk-xxxxxxxxxxxxxxxxxxxx"  # Replace this with your actual key
 
-
-# Create the GPT client (v1 style)
 client = OpenAI()
 
 # ==========================
@@ -88,7 +86,6 @@ def generate_summary(df):
         }
     return meta
 
-
 # ==========================
 # Define CrewAI Agents
 # ==========================
@@ -102,7 +99,7 @@ def create_agents():
     question_genius = Agent(
         role="Curious Catalyst",
         goal="Generate insightful questions from data",
-        backstory="Knows how to ask questions to uncover hidden insights",
+        backstory="Knows how to ask questions to uncover hidden insights. Will strictly focus only on the dataset provided and avoid referencing other datasets.",
         verbose=True
     )
     return schema_sleuth, question_genius
@@ -110,56 +107,96 @@ def create_agents():
 # ==========================
 # Define Tasks for Agents
 # ==========================
-def create_tasks(data, name, agent1, agent2):
-    analyze_task = Task(
-        description=f"""Analyze the dataset '{name}' and produce metadata including row/column count,
-        column data types, and purpose of each column.
-        Sample:
-        {data.head().to_string()}""",
-        agent=agent1,
-        expected_output="Structured metadata with column names, types, and descriptions"
-    )
+def create_tasks(datasets, agent1, agent2):
+    tasks = []
+    headers = []
 
-    question_task = Task(
-        description=f"""Based on the data structure of '{name}', generate exactly 15 insightful and varied questions
-        that a data analyst might ask to explore patterns, trends, or anomalies in the dataset.
-        The questions should reflect real-world data reasoning and be relevant to the column structure and values.""",
-        agent=agent2,
-        expected_output="A numbered list of 15 exploratory data analysis questions"
-    )
+    for name, df in datasets:
+        question_task = Task(
+            description=f"""You are given a single dataset named '{name}'. ONLY use this dataset to generate questions.
+Do NOT reference or compare with any other dataset, file, or external information.
 
-    return [analyze_task, question_task]
+Generate exactly 10 meaningful and diverse questions that a data analyst might ask.
+Focus on trends, relationships, anomalies, or potential KPIs based strictly on this dataset.
+
+Here is a sample from the dataset:
+
+{df.head().to_string()}""",
+            agent=agent2,
+            expected_output=f"--- Questions for {name} ---"
+        )
+        tasks.append(question_task)
+        headers.append(f"--- Questions for {name} ---")
+
+    return tasks, headers
+
+def create_comparison_task(datasets, agent):
+    comparison_task = Task(
+        description="""You are given multiple datasets. Generate questions that compare and contrast these datasets.
+Focus on identifying trends, differences, similarities, and potential insights that can be drawn from comparing them.
+
+Here are the datasets:
+""" + "\n".join([f"Dataset '{name}':\n{df.head().to_string()}" for name, df in datasets]),
+        agent=agent,
+        expected_output="--- Comparison Questions ---"
+    )
+    return comparison_task
 
 # ==========================
 # Main Function (Entry Point)
 # ==========================
 def main():
-    file_path = input("Enter the full path of your dataset (CSV, XLSX, or JSON): ").strip()
-    df = read_file(file_path)
-    schema_sleuth, question_genius = create_agents()
-    tasks = create_tasks(df, os.path.basename(file_path), schema_sleuth, question_genius)
+    num_files = int(input("Enter number of datasets: "))
+    datasets = []
 
-    crew = Crew(
-        agents=[schema_sleuth, question_genius],
-        tasks=tasks,
-        verbose=True,
-        process=Process.sequential
-    )
+    for i in range(num_files):
+        file_path = input(f"Enter full path of dataset {i+1} (CSV, XLSX, or JSON): ").strip()
+        df = read_file(file_path)
+        datasets.append((os.path.basename(file_path), df))
+
+    schema_sleuth, question_genius = create_agents()
+    tasks, headers = create_tasks(datasets, schema_sleuth, question_genius)
+
+    # Add comparison task
+    comparison_task = create_comparison_task(datasets, question_genius)
+    tasks.append(comparison_task)
+    headers.append("--- Comparison Questions ---")
 
     logging.info("🚀 Starting Meta Minds Analysis...\n")
-    result = crew.kickoff()
-    summary = generate_summary(df)
+    results = []
+    for task in tasks:
+        crew = Crew(agents=[task.agent], tasks=[task], process=Process.sequential, verbose=True)
+        result = crew.kickoff()
+        results.append(result)
 
-    # Save output to a text file
-    output_lines = ["====== DATA SUMMARY ======", f"Rows: {summary['rows']}", f"Columns: {summary['columns']}", ""]
-    for col, info in summary["column_info"].items():
-        output_lines.append(f"{col} ({info['dtype']}): {info['description']}")
-    output_lines.append("\n====== GENERATED QUESTIONS ======")
-    if isinstance(result, list):
-        for q in result:
-            output_lines.append(f"- {q}")
+    # Save output to file
+    output_lines = []
+
+    for name, df in datasets:
+        summary = generate_summary(df)
+        output_lines.append(f"====== DATA SUMMARY FOR {name} ======")
+        output_lines.append(f"Rows: {summary['rows']}")
+        output_lines.append(f"Columns: {summary['columns']}")
+        for col, info in summary["column_info"].items():
+            output_lines.append(f"{col} ({info['dtype']}): {info['description']}")
+        output_lines.append("")
+
+    output_lines.append("====== GENERATED QUESTIONS ======")
+
+    if isinstance(results, list):
+        for header, content in zip(headers, results):
+            if header.startswith("--- Questions for") or header.startswith("--- Comparison Questions ---"):
+                output_lines.append(f"\n{header.strip()}")
+                content_str = str(content).strip()
+                cleaned_lines = [
+                    line for line in content_str.split("\n")
+                    if header.strip() not in line and line.strip() != ""
+                ]
+                cleaned_lines = [line.split('. ', 1)[-1] for line in cleaned_lines]
+                for idx, question in enumerate(cleaned_lines, start=1):
+                    output_lines.append(f"{idx}. {question.strip()}")
     else:
-        output_lines.append(str(result))
+        output_lines.append(str(results))
 
     with open("meta_output.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(output_lines))
@@ -168,3 +205,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
