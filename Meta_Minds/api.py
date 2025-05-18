@@ -1,4 +1,3 @@
-# api.py
 # This file defines the FastAPI application for the Meta Minds data analysis workflow.
 # It provides an endpoint to trigger the analysis process by accepting file paths.
 
