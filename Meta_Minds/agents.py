@@ -1,7 +1,20 @@
+# agents.py
+# This file defines the AI agents used in the CrewAI workflow.
+# Each agent has a specific role, goal, and backstory to guide its behavior.
+
 from crewai import Agent
 import logging # Although not explicitly used in create_agents, good practice to import if part of the system
 
 def create_agents():
+    """Defines and returns the AI agents for the CrewAI workflow.
+
+    These agents are responsible for specific roles in the data analysis process.
+    The function initializes and configures two agents: Schema Sleuth and Curious Catalyst.
+
+    Returns:
+        tuple: A tuple containing the schema sleuth and question genius agents.
+               (schema_sleuth: Agent, question_genius: Agent)
+    """
     """Defines and returns the AI agents for the CrewAI workflow.
 
     These agents are responsible for specific roles in the data analysis process.
@@ -10,6 +23,10 @@ def create_agents():
         tuple: A tuple containing the schema sleuth and question genius agents.
     """
     logging.info("Creating CrewAI agents...")
+
+    # Define the Schema Sleuth agent
+    # Role: Focuses on understanding the structure and metadata of datasets.
+    # Goal: To provide a detailed description of the dataset schema.
     schema_sleuth = Agent(
         role="Schema Sleuth",
         goal="Analyze data structure and describe dataset schema",
@@ -22,6 +39,10 @@ def create_agents():
         verbose=True, # Keep verbose for seeing agent thought process
         allow_delegation=False # Agents in this simple setup don't delegate to each other
     )
+
+    # Define the Curious Catalyst agent
+    # Role: Focuses on generating analytical questions based on the provided data.
+    # Goal: To create insightful questions for deeper data analysis.
     # Refined backstory for clarity and emphasis on focusing on the provided data
     question_genius = Agent(
         role="Curious Catalyst",
@@ -36,5 +57,8 @@ def create_agents():
         verbose=True, # Keep verbose
         allow_delegation=False # Agents don't delegate
     )
+
     logging.info("CrewAI agents created.")
+
+    # Return the created agents
     return schema_sleuth, question_genius
