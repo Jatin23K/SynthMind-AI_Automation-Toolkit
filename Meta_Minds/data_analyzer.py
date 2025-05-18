@@ -1,8 +1,24 @@
+# This file contains functions for analyzing datasets, specifically for generating column descriptions using an AI model.
+
 from config import client # Import the pre-initialized OpenAI client
 import pandas as pd # Needed for DataFrame type hinting and operations
 import logging
 
 def generate_column_descriptions(data: pd.DataFrame) -> dict:
+    """Generates descriptions for each column in a DataFrame using GPT.
+
+    This function iterates through the columns of a pandas DataFrame, extracts sample values,
+    and uses an OpenAI model (via the imported client) to generate a short description
+    for each column based on its name and sample data.
+
+    Args:
+        data (pandas.DataFrame): The DataFrame to analyze.
+
+    Returns:
+        dict: A dictionary mapping column names (str) to their generated descriptions (str).
+              Returns an empty dictionary if the input DataFrame is empty or if description
+              generation fails for all columns.
+    """
     """Generates descriptions for each column in a DataFrame using GPT.
 
     Args:
@@ -57,11 +73,19 @@ def generate_column_descriptions(data: pd.DataFrame) -> dict:
 def generate_summary(df: pd.DataFrame) -> dict:
     """Generates a summary of the DataFrame, including row count, column count, and column descriptions.
 
+    This function calculates the number of rows and columns and calls `generate_column_descriptions`
+    to get AI-generated descriptions for each column. It then compiles this information
+    into a structured dictionary.
+
     Args:
         df (pandas.DataFrame): The DataFrame to summarize.
 
     Returns:
-        dict: A dictionary containing the summary information.
+        dict: A dictionary containing the summary information:
+              - 'rows' (int): Number of rows.
+              - 'columns' (int): Number of columns.
+              - 'column_info' (dict): A dictionary mapping column names to their dtype and description.
+              Returns a summary with zero counts and empty column info if the input DataFrame is empty.
     """
     logging.info("Generating data summary...")
     if df.empty:
