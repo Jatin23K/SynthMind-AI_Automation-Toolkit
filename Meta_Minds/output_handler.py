@@ -1,7 +1,20 @@
+# output_handler.py
+# This file contains functions for handling the final output of the data analysis workflow.
+# It provides a function to save the generated output (summaries and questions) to a file.
+
 import logging
 import os # Good practice to import os if dealing with file paths
 
 def save_output(filename: str, output_lines: list[str]):
+    """Saves the output lines to a file.
+
+    This function takes a filename and a list of strings (representing lines of output)
+    and writes them to the specified file. It also ensures the output directory exists.
+
+    Args:
+        filename (str): The path (including filename) where the output should be saved.
+        output_lines (list[str]): A list of strings, where each string is a line to write to the file.
+    """
     """Saves the output lines to a file.
 
     Args:
