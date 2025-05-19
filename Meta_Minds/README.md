@@ -1,13 +1,6 @@
 # 🧠 Meta_Minds (Agent-DS)
 
-Meta_Minds is an AI-powered, modular data analysis framework that automates the complete data pipeline — from loading and cleaning to analyzing and generating insights using OpenAI's API.
-
-This project is part of the **Agent-DS** system, designed to behave like an intelligent data assistant with capabilities to:
-- Automatically detect data types and structures
-- Clean, preprocess, and transform datasets
-- Analyze patterns and extract insights using AI
-- Prepare data for reporting or visualization
-- Log and handle outputs systematically
+This project utilizes CrewAI to create AI agents that assist in data analysis by generating insightful questions based on provided datasets. It includes agents for analyzing individual datasets and generating comparative questions across multiple datasets.
 
 ---
 
