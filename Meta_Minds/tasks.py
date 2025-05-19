@@ -1,8 +1,25 @@
+# tasks.py
+# This file contains functions for creating CrewAI tasks based on the provided datasets.
+# It defines tasks for individual dataset analysis and comparative analysis.
+
 from crewai import Task
 import pandas as pd # Needed for DataFrame type hinting
 import logging # Although not strictly needed inside tasks, useful for logging task creation
 
 def create_tasks(datasets: list[tuple[str, pd.DataFrame]], agent1, agent2) -> tuple[list[Task], list[str]]:
+    """Creates individual tasks for the AI agents to generate questions for each dataset.
+
+    Args:
+        datasets (list): A list of tuples containing the dataset name (str) and DataFrame (pd.DataFrame).
+        agent1 (crewai.Agent): The schema sleuth agent (though not used in the *current* task definition,
+                                included for completeness if schema tasks were added).
+        agent2 (crewai.Agent): The question genius agent.
+
+    Returns:
+        tuple: A tuple containing the list of generated crewai.Task objects
+               and the list of corresponding header strings for output.
+               (tasks: list[Task], headers: list[str])
+    """
     """Creates individual tasks for the AI agents to generate questions for each dataset.
 
     Args:
@@ -24,6 +41,7 @@ def create_tasks(datasets: list[tuple[str, pd.DataFrame]], agent1, agent2) -> tu
     # If you wanted a CrewAI task for schema analysis, you would define it here as well,
     # potentially using agent1 (schema_sleuth). For now, adhering to the original task structure.
 
+    # Iterate through each dataset to create a task for it
     for name, df in datasets:
         # Limit sample to avoid exceeding token limits for very wide dataframes
         sample_string = df.head().to_string()
@@ -31,7 +49,7 @@ def create_tasks(datasets: list[tuple[str, pd.DataFrame]], agent1, agent2) -> tu
              sample_string = df.head().to_string()[:2000] + "\n[...truncated...]"
              logging.warning(f"Sample for task description for '{name}' was truncated.")
 
-
+        # Define the task for generating questions for a single dataset
         question_task = Task(
             description=f"""You are given a single dataset named '{name}'. Your goal is to generate insightful questions for data analysis.
             
@@ -54,6 +72,7 @@ Here is a sample from the dataset to help you understand its content:
         headers.append(f"--- Questions for {name} ---")
 
     logging.info(f"Created {len(tasks)} individual dataset analysis tasks.")
+    # Return the list of tasks and corresponding headers
     return tasks, headers
 
 
@@ -69,6 +88,18 @@ def create_comparison_task(datasets: list[tuple[str, pd.DataFrame]], agent) -> T
     Returns:
         crewai.Task | None: The comparison task if more than one dataset exists, otherwise None.
     """
+    """Creates a task for the AI agent to generate comparison questions across multiple datasets.
+
+    This task is only created if there is more than one dataset provided.
+
+    Args:
+        datasets (list): A list of tuples containing the dataset name (str) and DataFrame (pd.DataFrame).
+        agent (crewai.Agent): The question genius agent.
+
+    Returns:
+        crewai.Task | None: The comparison task if more than one dataset exists, otherwise None.
+    """
+    # Check if there is more than one dataset for comparison
     if len(datasets) <= 1:
         logging.info("Only one dataset provided, skipping comparison task creation.")
         return None # No comparison needed for a single file
@@ -85,6 +116,7 @@ def create_comparison_task(datasets: list[tuple[str, pd.DataFrame]], agent) -> T
          comparison_sample_string += f"\nDataset '{name}':\n{sample_string}\n"
          comparison_sample_string += "-"*20 + "\n" # Separator
 
+    # Define the task for generating comparison questions
     comparison_task = Task(
         description=f"""You are given multiple datasets with the goal of generating questions that compare and contrast them.
 
@@ -104,4 +136,5 @@ Here are samples from the datasets:
         human_input=False # Typically tasks don't need human input in this flow
     )
     logging.info("Comparison analysis task created.")
+    # Return the comparison task
     return comparison_task
