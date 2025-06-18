@@ -1,4 +1,0 @@
-openai
-pandas
-crewai
-python-dotenv
