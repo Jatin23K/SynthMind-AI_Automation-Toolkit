@@ -1,0 +1,65 @@
+data_purifier/
+├── __init__.py               # Initializes the `data_purifier` Python package. This file is typically empty but is required by Python to treat the directory as a package, allowing its modules to be imported.
+├── .env                      # Configuration file for environment variables. It stores sensitive information like API keys (e.g., OPENAI_API_KEY) and other configurable settings for local development. It should be excluded from version control in production.
+├── .dockerignore             # Specifies files and directories that Docker should ignore when building the Docker image. This helps in creating smaller, more efficient, and secure Docker images by excluding unnecessary development artifacts, cache files, and sensitive data.
+├── data_purification.log     # The primary log file for the entire data purification process. It captures detailed activities, status updates, warnings, and errors from all agents and components, serving as a comprehensive audit trail.
+├── delete_redundant_files.py # A utility script designed to identify and delete redundant or unnecessary files within the project or specified directories. This can include temporary outputs, old logs, or duplicate data.
+├── delete_temp_files.py      # A utility script specifically for cleaning up temporary files generated during the execution of the data purification pipeline. This helps in managing disk space and maintaining a clean working environment.
+├── desktop.ini               # A hidden configuration file used by Windows operating systems to customize the display of a folder. It is not relevant to the Python application and can be ignored.
+├── folderico-fLNqcf.ico      # An icon file associated with a folder, typically used for visual customization on Windows. It is not part of the application's core functionality and can be ignored.
+├── main.py                   # The main entry point of the Data Purification System. This script orchestrates the overall workflow, initializes the core agents, manages parallel processing of datasets, and handles command-line arguments and profiling.
+├── meta_output.txt           # An example file that can be used to provide user-defined metadata, analytical questions, and initial processing instructions to the `MetaAnalyzerAgent`. In a real scenario, this might be dynamically generated or provided via an API.
+├── output.csv                # An example of the final output file for a processed dataset in CSV format. This file contains the data after it has gone through the entire purification pipeline (cleaning, modification, and transformation).
+├── output.csv.json           # A comprehensive JSON report associated with the `output.csv` file. It details every step of the data purification process, including operations performed, validation results, and any adaptive decisions made by the agents.
+├── project_structure.txt     # This file itself, providing a detailed, human-readable overview of the project's directory and file organization, explaining the purpose of each component.
+├── pyproject.toml            # Project configuration file, typically used for modern Python projects. It can define build system requirements, project metadata, and configurations for tools like linters (e.g., Ruff) and formatters.
+├── Readme.md                 # The main README file for the project. It provides a high-level overview of the Data Purification System, its key features, architecture, installation instructions, usage guidelines, and deployment readiness information.
+├── requirements.txt          # Lists all external Python dependencies required for the project. This file is used by `pip` to install all necessary libraries to run the application, ensuring a consistent environment.
+├── test_openai_key.py        # A utility script designed to test the configuration and validity of the OpenAI API key. It helps verify that the system can successfully authenticate and communicate with the OpenAI services.
+├── test_report.json          # A JSON formatted report generated after running the test suite. It summarizes the test results, including passed, failed, and skipped tests, and can be used for automated reporting in CI/CD pipelines.
+├── yt.csv                    # An example input dataset in CSV format. This file serves as sample data for testing and demonstrating the capabilities of the data purification pipeline.
+│
+├── agents/                   # This directory contains the core AI agents, each responsible for a specific stage or aspect of the data purification process. They embody the multi-agent architecture of the system.
+│   ├── __pycache__/          # Python bytecode cache directory. It stores compiled Python files (`.pyc`) to speed up subsequent executions of the modules.
+│   ├── cleaner_agent.py      # **Advanced Cleaner Agent**: This agent is responsible for identifying and rectifying common data quality issues. It handles missing values (with adaptive imputation strategies like mean, median, or mode), detects and addresses outliers (using methods like IQR, Z-score, or Isolation Forest), manages duplicate records, and resolves inconsistencies (e.g., using fuzzy matching and case standardization).
+│   ├── cleaning_validator_agent.py # **Cleaning Validator Agent**: This agent specifically validates the output of the `CleanerAgent`. It checks for any residual data quality issues after cleaning and provides specific, actionable recommendations to the `OrchestratorAgent` for further re-cleaning or refinement.
+│   ├── delete_cleaner_simple.py # A simple, potentially deprecated, cleaner script. Its presence might indicate an older or experimental cleaning routine that is not part of the main orchestrated pipeline.
+│   ├── meta_analyzer_agent.py# **Advanced Meta Analyzer Agent**: This crucial agent performs initial data analysis, loads raw data (with parallel processing for efficiency), and generates a preliminary processing plan. Its logic is enhanced to intelligently suggest cleaning, modification, and transformation operations based on data characteristics. It also ensures data uniqueness after initial loading.
+│   ├── modification_validator_agent.py # **Modification Validator Agent**: This agent validates the output of the `DataModifierAgent`. It ensures that feature engineering, data aggregation, and other modification operations have been applied correctly and as intended, maintaining data integrity.
+│   ├── modifier_agent.py     # **Advanced Data Modifier Agent**: This agent is responsible for restructuring and enriching the dataset. It performs feature engineering (e.g., creating new columns based on existing ones, with adaptive age/BMI grouping), data aggregation (summarizing data), and general column operations like renaming or dropping.
+│   ├── orchestrator_agent.py # **Orchestrator Agent**: The central control unit and "brain" of the entire data purification pipeline. It defines the overall execution flow, dynamically delegates tasks to specialized agents, manages iterative refinement based on validation feedback, and integrates learned optimizations for adaptive processing.
+│   ├── process_recorder_agent.py # **Advanced Process Recorder Agent**: This agent is dedicated to logging and recording all significant activities and outcomes throughout the data purification pipeline. It maintains a detailed audit trail and generates a comprehensive, human-readable final report summarizing the entire pipeline run, including data quality impacts and adaptive choices made.
+│   ├── transformation_validator_agent.py # **Transformation Validator Agent**: This agent validates the output of the `TransformerAgent`. It checks if data transformation operations, such as text processing, scaling, and categorical encoding, have been applied correctly and yield the expected results.
+│   └── transformer_agent.py  # **Advanced Transformer Agent**: This agent handles various data transformation operations. It includes functionalities for data scaling (e.g., Min-Max, Standard scaling, with adaptive choices based on data distribution), categorical encoding (e.g., One-Hot, Label, Frequency encoding, with adaptive choices based on cardinality), and text processing (e.g., lowercasing, stopword removal, lemmatization).
+│
+├── config/                   # This directory stores configuration-related files for the application.
+│   ├── __pycache__/          # Python bytecode cache for the `config` directory.
+│   └── settings.py           # A Python script responsible for loading application settings and environment variables. It centralizes configuration management, including LLM configurations and API keys.
+│
+├── data_purifier.egg-info/   # A metadata directory generated by `setuptools` when a Python package is installed or built. It contains information about the package, its dependencies, and its structure.
+│   ├── dependency_links.txt  # Lists URLs for package dependencies.
+│   ├── PKG-INFO              # Contains core metadata about the package (e.g., name, version, author).
+│   ├── requires.txt          # Lists the required packages for the distribution.
+│   ├── SOURCES.txt           # Lists all source files included in the package.
+│   └── top_level.txt         # Lists the top-level modules or packages provided by this distribution.
+│
+├── tests/                    # This directory contains unit and integration tests for various components and the overall pipeline of the project.
+│   ├── __pycache__/          # Python bytecode cache for the `tests` directory.
+│   ├── __init__.py           # Initializes the `tests` Python package.
+│   ├── conftest.py           # A `pytest` specific file that can define fixtures and hooks for the test suite, providing reusable setup and teardown logic.
+│   ├── run_tests.py          # A script to manually run a subset or all of the test suite. It imports and executes test functions from other test modules.
+│   ├── test_cleaner.py       # Unit tests specifically designed to verify the functionality and correctness of the `CleanerAgent`.
+│   ├── test_integration.py   # Integration tests that verify the end-to-end flow and interaction between multiple agents within the data purification pipeline.
+│   ├── test_meta_analyzer.py # Unit tests for the `MetaAnalyzerAgent`, ensuring its data analysis, loading, and instruction generation capabilities work as expected.
+│   ├── test_modifier.py      # Unit tests for the `DataModifierAgent`, verifying its feature engineering, aggregation, and column manipulation operations.
+│   ├── test_recorder.py      # Unit tests for the `ProcessRecorderAgent`, ensuring it accurately logs activities and generates comprehensive reports.
+│   ├── test_transformer.py   # Unit tests for the `TransformerAgent`, verifying its data transformation operations like scaling, encoding, and text processing.
+│   └── utils/                # A subdirectory within `tests` containing helper utilities specifically for the test suite.
+│       ├── __pycache__/      # Python bytecode cache for the `tests/utils` directory.
+│       └── test_helpers.py   # Contains helper functions and utilities that are used across multiple test files to facilitate test setup and assertions.
+│
+└── utils/                    # This directory contains general utility functions and helper scripts that support various parts of the application but are not core agents.
+    ├── __pycache__/          # Python bytecode cache for the `utils` directory.
+    ├── cached_chat_openai.py # A custom wrapper around OpenAI's Chat API that implements in-memory caching for LLM responses. This helps reduce API calls and speed up repeated requests.
+    ├── llm_cache.py          # A simple, generic in-memory caching mechanism specifically designed for LLM responses. It helps manage and retrieve cached LLM outputs.
+    └── report_generator.py   # A utility class responsible for generating various types of reports, including detailed JSON reports and user-friendly HTML reports, summarizing the data purification process.

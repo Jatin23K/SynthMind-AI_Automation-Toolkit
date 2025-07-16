@@ -1,0 +1,215 @@
+import cProfile
+import pstats
+import logging
+import time
+import pandas as pd
+import os
+import argparse
+import sys
+import multiprocessing
+
+# Import necessary agents from their respective modules
+from data_purifier.agents.orchestrator_agent import OrchestratorAgent
+from data_purifier.agents.process_recorder_agent import ProcessRecorderAgent
+from data_purifier.agents.meta_analyzer_agent import MetaAnalyzerAgent
+from data_purifier.config.settings import load_config # Configuration loader
+
+# main.py
+# This is the main entry point for the Data Purification System.
+# It orchestrates the entire data processing pipeline, from input to final output.
+# The system is designed to process multiple datasets in parallel, leveraging a multi-agent architecture.
+
+def setup_logging(verbose: bool):
+    """
+    Sets up the logging configuration for the application.
+    Logs are directed to both a file ('data_purification.log') and the console.
+
+    Args:
+        verbose (bool): If True, sets the logging level to DEBUG for more detailed output.
+                        Otherwise, sets it to INFO.
+    """
+    # Determine the logging level based on the 'verbose' flag.
+    # DEBUG provides very detailed information, while INFO provides general progress.
+    log_level = logging.DEBUG if verbose else logging.INFO
+    
+    # Configure the basic logging settings.
+    logging.basicConfig(
+        level=log_level,  # Set the overall logging level
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', # Define log message format
+        handlers=[
+            logging.FileHandler('data_purification.log'),  # Direct logs to a file named 'data_purification.log'
+            logging.StreamHandler()  # Direct logs to the console (standard output/error)
+        ]
+    )
+    # Return a logger instance for this module.
+    return logging.getLogger(__name__)
+
+def process_single_dataset(dataset_info):
+    """
+    Processes a single dataset through the data purification pipeline.
+    This function is designed to be run in parallel for multiple datasets.
+
+    Args:
+        dataset_info (dict): A dictionary containing paths for the input dataset,
+                             output cleaned dataset, and meta-information file.
+                             Example: {"input": "path/to/raw.csv", "output": "path/to/cleaned.csv", "meta": "path/to/meta.txt"}
+
+    Returns:
+        bool: True if the dataset was processed successfully, False otherwise.
+    """
+    # Extract file paths from the dataset_info dictionary.
+    dataset_paths = [dataset_info["input"]]
+    output_path = dataset_info["output"]
+    meta_output_path = dataset_info["meta"]
+
+    print(f"\n--- Processing {dataset_paths[0]} ---")
+    
+    # Load configuration settings for the application.
+    try:
+        config = load_config()
+    except EnvironmentError as e:
+        # If essential environment variables are missing, log an error and exit.
+        print(f"Configuration Error: {e}")
+        print("Please ensure all required environment variables are set.")
+        return False # Indicate failure to process this dataset
+
+    # Set up logging for this specific process.
+    # The log level is determined by the 'log_level' setting in the loaded configuration.
+    logger = setup_logging(config.get("log_level", "INFO").upper() == "DEBUG")
+    logger.info(f"Starting data purification for datasets: {dataset_paths}")
+
+    # Initialize the ProcessRecorderAgent to log all activities throughout the pipeline.
+    process_recorder_agent = ProcessRecorderAgent()
+    
+    # Initialize the OrchestratorAgent, which controls the flow of the entire pipeline.
+    # It receives the process recorder and the application configuration.
+    orchestrator = OrchestratorAgent(process_recorder_agent=process_recorder_agent, config=config)
+    
+    # Initialize the MetaAnalyzerAgent, responsible for initial data analysis and planning.
+    # It also receives the application configuration.
+    meta_analyzer_agent = MetaAnalyzerAgent(config=config)
+
+    # --- Meta-Analysis Stage ---
+    # This stage involves loading the raw data and generating a processing plan.
+    try:
+        logger.info("Loading and analyzing datasets using MetaAnalyzerAgent...")
+        # The MetaAnalyzerAgent analyzes the input data and meta-information,
+        # returning the optimized DataFrame and a report with suggested operations.
+        df, meta_analysis_report = meta_analyzer_agent.analyze(
+            num_datasets=len(dataset_paths),  # Number of datasets to analyze (currently 1 per call)
+            dataset_paths=dataset_paths,      # List of input dataset paths
+            meta_output_path=meta_output_path # Path to the meta-information file
+        )
+        logger.info(f"Datasets loaded and initial meta-analysis complete. DataFrame shape: {df.shape}")
+        
+        # The Orchestrator receives the processing instructions generated by the MetaAnalyzer.
+        orchestrator.set_processing_instructions(meta_analysis_report)
+
+    except Exception as e:
+        # If any error occurs during meta-analysis or data loading, log it and report failure.
+        logger.error(f"Critical error during meta-analysis or data loading for {dataset_paths[0]}: {e}", exc_info=True)
+        print(f"Data purification failed at meta-analysis stage for {dataset_paths[0]}. Check logs for details.")
+        return False # Indicate failure
+
+    # --- Orchestrated Data Processing Stage ---
+    # This is where the main data purification pipeline is executed.
+    start_time = time.time() # Record the start time for performance measurement
+    logger.info("Starting orchestrated data processing pipeline...")
+    
+    # The OrchestratorAgent takes the DataFrame and guides it through cleaning,
+    # modification, and transformation stages based on the generated instructions.
+    success, cleaned_df = orchestrator.orchestrate_data_processing(
+        df=df,                  # The DataFrame to be processed
+        meta_output_path=meta_output_path, # Path to meta-information (for logging/reporting context)
+        report_path=output_path # Base path for saving the final report and processed data
+    )
+    end_time = time.time() # Record the end time
+    logger.info(f"Total processing time for {dataset_paths[0]}: {end_time - start_time:.2f} seconds")
+
+    # --- Final Outcome Reporting ---
+    if success:
+        logger.info("Data purification completed successfully!")
+        print(f"\nData purification completed successfully for {dataset_paths[0]}!")
+        print(f"Processed dataset saved to: {output_path}")
+        return True # Indicate successful processing
+    else:
+        logger.error(f"Data purification failed for {dataset_paths[0]}. Check the logs and 'data_purification.log' for details.")
+        print(f"\nData purification failed for {dataset_paths[0]}. Check the logs for details.")
+        return False # Indicate failed processing
+
+def main():
+    """
+    Main entry point for the data purification system.
+    It defines the datasets to be processed and orchestrates their parallel execution.
+    """
+    print("--- Data Purification System ---")
+
+    # Define a list of dictionaries, where each dictionary represents a dataset
+    # to be processed. This allows for easy configuration of multiple processing jobs.
+    all_dataset_info = [
+        {
+            "input": "E:/Gemini CLI/data_purifier/data/DIS_stock_price.csv",
+            "output": "E:/Gemini CLI/data_purifier/Cleaned_DIS_stock_price.csv",
+            "meta": "E:/Gemini CLI/data_purifier/meta_output.txt" # Using a generic meta_output.txt for now
+        },
+        {
+            "input": "E:/Gemini CLI/data_purifier/data/DIS_stock_split.csv",
+            "output": "E:/Gemini CLI/data_purifier/Cleaned_DIS_stock_split.csv",
+            "meta": "E:/Gemini CLI/data_purifier/meta_output.txt"
+        },
+        {
+            "input": "E:/Gemini CLI/data_purifier/data/NFLX_stock_price.csv",
+            "output": "E:/Gemini CLI/data_purifier/Cleaned_NFLX_stock_price.csv",
+            "meta": "E:/Gemini CLI/data_purifier/meta_output.txt"
+        },
+        {
+            "input": "E:/Gemini CLI/data_purifier/data/NFLX_stock_split.csv",
+            "output": "E:/Gemini CLI/data_purifier/Cleaned_NFLX_stock_split.csv",
+            "meta": "E:/Gemini CLI/data_purifier/meta_output.txt"
+        }
+    ]
+
+    # Determine the number of CPU cores available to utilize for parallel processing.
+    num_processes = multiprocessing.cpu_count() 
+    print(f"Starting parallel processing with {num_processes} processes...")
+
+    # Use a multiprocessing Pool to distribute the processing of each dataset
+    # across multiple CPU cores. Each dataset will be handled by a separate process.
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        # Map the 'process_single_dataset' function to each item in 'all_dataset_info'.
+        # The 'pool.map' function blocks until all processes complete.
+        results = pool.map(process_single_dataset, all_dataset_info)
+
+    print("\n=== All Data Purification Processes Finished ===")
+    
+    # Check if all datasets were processed successfully.
+    if all(results):
+        print("All datasets processed successfully!")
+        sys.exit(0) # Exit with a success code
+    else:
+        print("Some datasets failed to process. Check logs for details.")
+        sys.exit(1) # Exit with a failure code
+
+# This block ensures that the profiling and main function are executed only when
+# the script is run directly (not when imported as a module).
+if __name__ == '__main__':
+    # Initialize cProfile to collect performance statistics.
+    profiler = cProfile.Profile()
+    profiler.enable() # Start profiling
+
+    # Call the main function to begin the data purification process.
+    main()
+
+    profiler.disable() # Stop profiling
+    
+    # Create a Stats object from the collected profiling data.
+    # Sort the statistics by 'cumulative time' to see which functions took the most time.
+    stats = pstats.Stats(profiler).sort_stats('cumtime')
+    
+    # Print the top 10 functions that consumed the most cumulative time.
+    stats.print_stats(10) 
+
+    # Save the profiling statistics to a file.
+    # This file can be analyzed later with tools like 'snakeviz' for a visual representation
+    # of the performance bottlenecks.
+    stats.dump_stats('data_purification_profile.prof')

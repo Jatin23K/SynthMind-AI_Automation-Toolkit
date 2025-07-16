@@ -1,0 +1,64 @@
+# .dockerignore
+# This file specifies intentionally untracked files and directories that Docker should ignore
+# when building an image. Ignoring unnecessary files helps to reduce the Docker image size,
+# speed up build times, and improve security by not including sensitive or irrelevant data.
+
+# Ignore Git-related artifacts.
+# These files are specific to version control and are not needed in the Docker image.
+.git
+.gitignore
+
+# Ignore Python-specific artifacts and virtual environments.
+# These files are typically generated during development or by Python's interpreter
+# and are not required for the application to run inside the Docker container.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/ # Ignore Python virtual environments.
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/ # Ignore pytest cache directory.
+.ruff_cache/ # Ignore ruff linter cache directory.
+
+# Ignore IDE (Integrated Development Environment) and editor-specific files.
+# These files contain user-specific settings, project configurations, or temporary data
+# that are relevant only to the development environment.
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+
+# Ignore build artifacts and distribution packages.
+# These are generated during the build process of Python packages and are not
+# part of the source code needed for the application's runtime.
+build/
+dist/
+*.egg-info/
+
+# Ignore data files and logs that are typically generated at runtime or are too large
+# to be included in the Docker image. If these are needed, they should be mounted
+# as Docker volumes during container runtime.
+data/ # Assuming input data is mounted as a volume or fetched at runtime.
+*.log # Log files.
+*.prof # Profiling data.
+*.json # Assuming test_report.json and other JSON files are not needed in the final image.
+
+# Ignore temporary files and system-specific hidden files.
+tmp/
+.DS_Store # macOS specific file.
+Thumbs.db # Windows specific file.
+
+# Exclude test-related files and directories.
+# Tests are typically run during the CI/CD pipeline or development, not in the
+# final production Docker image, reducing its size significantly.
+tests/

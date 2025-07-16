@@ -1,0 +1,138 @@
+====== DATA SUMMARY FOR DIS_stock_price.csv ======
+Rows: 6281
+Columns: 6
+Date (object): The "Date" column contains dates in the format YYYY-MM-DD, representing specific calendar dates.
+Open Price (float64): The "Open Price" column represents the initial trading price of a particular asset or security at the beginning of a trading session or period. It includes values such as 25.31, 25.56, and 27.38, indicating the price at which the asset was first traded during those specific instances.
+High Price (float64): The "High Price" column represents the highest price at which a particular item or stock was traded or sold at a given point in time.
+Low Price (float64): The "Low Price" column represents the lowest price at which a product or item was sold, with sample values ranging from 24.94 to 26.69.
+Close Price (float64): The "Close Price" column represents the final trading price of a stock or security at the end of a trading day. The sample values provided (25.69, 26.25, 26.88) indicate the closing prices of the stock on different days.
+Volume (float64): The "Volume" column represents the total number of shares traded for a particular asset within a given time period, typically measured in units. The sample values provided indicate the volume of shares traded for three different instances.
+
+====== DATA SUMMARY FOR DIS_stock_split.csv ======
+Rows: 8
+Columns: 2
+Date (object): The "Date" column contains timestamps in the format of year-month-day with time and timezone information included. This column likely represents specific dates and times related to events or data points within a dataset.
+Stock Splits (object): The "Stock Splits" column indicates the ratio at which a company's stock has been split, with the first number representing the number of new shares received for each existing share. For example, a ratio of 2:01 means that for every one share owned before the split, the shareholder now owns two shares.
+
+====== DATA SUMMARY FOR NFLX_stock_price.csv ======
+Rows: 5640
+Columns: 6
+Date (object): The "Date" column stores dates in the format YYYY-MM-DD, representing specific calendar dates such as May 23, 2002, May 24, 2002, and May 28, 2002.
+Open Price (float64): The "Open Price" column represents the initial price at which a security or financial instrument started trading on a particular day. The sample values listed are examples of different open prices for various trading sessions.
+High Price (float64): The "High Price" column represents the highest price at which a particular item or asset was traded or sold. The sample values provided indicate the highest prices recorded at different points in time.
+Low Price (float64): The "Low Price" column represents the lowest price at which a product or service was offered or sold, with sample values ranging from 16.04 to 16.76.
+Close Price (float64): The "Close Price" column represents the final trading price of a stock or security at the end of a particular trading day. The sample values provided (16.75, 16.94, 16.2) are examples of different closing prices for the security on different days.
+Volume (float64): The "Volume" column represents the total number of units or shares traded for a particular asset or security within a given time period. The sample values provided indicate the volume of trading activity for the asset or security on different occasions.
+
+====== DATA SUMMARY FOR NFLX_stock_split.csv ======
+Rows: 2
+Columns: 2
+Date (object): The "Date" column stores dates and times with timezone information, such as "2004-02-12 00:00:00-05:00" and "2015-07-15 00:00:00-04:00".
+Stock Splits (object): The "Stock Splits" column indicates the ratio at which a company's stock has been divided, with the first number representing the number of new shares received for each existing share. For example, a ratio of 2:01 means that for every one share held, the shareholder will receive two additional shares.
+
+====== GENERATED QUESTIONS ======
+
+--- Questions for DIS_stock_price.csv ---
+1. What is the overall trend of the stock price over the entire recorded period?
+2. How does the average closing price compare on a monthly basis throughout the dataset?
+3. Which day in the dataset recorded the highest trading volume, and what was the corresponding closing price?
+4. What is the correlation between the opening price and the closing price during the recorded period?
+5. Are there particular months or seasons where the stock price tends to increase or decrease more substantially?
+6. What percentage of days closed with a price lower than the open price, indicating a day of loss?
+7. How do the high and low prices compare over time, and what is the average range for these prices?
+8. Are there any noticeable spikes or dips in stock price that may indicate significant market events, and when did these occur?
+9. What is the average daily trading volume, and how does it vary from the beginning to the end of the dataset?
+10. Are there significant differences in stock price behavior before and after particular date thresholds (e.g., year-end, quarter-end)?
+11. What are the moving averages (e.g., 5-day, 30-day) for the closing prices, and how do they reflect the stock price trends?
+12. How do daily percentage changes in closing price vary across the dataset?
+13. How often does the stock close at a price that is higher than its open price, and what may influence this trend?
+14. What are the largest price drops observed in single-day closing prices, and when did these occur?
+15. Are there any consistent patterns or anomalies in trading volume associated with specific price changes?
+16. What was the average gain or loss per month, and were there certain months with unusually high volatility?
+17. How do Fridays compare to other weekdays in terms of closing price trends and trading volume?
+18. Are there any relationships between the opening price of a particular day and the closing price of the previous day?
+19. What is the longest streak of consecutive days where the closing price increased or decreased, and what context can we provide for that period?
+20. How does the variability of closing prices compare to the variability of opening prices?
+
+--- Questions for DIS_stock_split.csv ---
+1. What is the total number of stock splits recorded in the dataset?
+2. How many years does the dataset cover from the first recorded stock split to the last?
+3. What is the frequency of stock splits per decade?
+4. Are there any notable patterns in the timing of stock splits (e.g., specific months or quarters)?
+5. What is the distribution of stock split ratios present in the dataset, and how do they vary over time?
+6. Are there any years where multiple stock splits occurred, and if so, which years had the highest count?
+7. How do stock splits in the earlier years compare to those in more recent years in terms of frequency?
+8. Is there a correlation between the stock split ratios (e.g., 2:1, 4:1) and their corresponding dates?
+9. What is the longest interval between stock splits recorded in the dataset?
+10. Which specific stock split ratio has occurred the most frequently in the dataset?
+11. How many unique stock split ratios are represented in the dataset?
+12. Have there been any large gaps in the timeline of stock splits, and if so, what are the lengths of these gaps?
+13. Can a trend in stock split activity be observed over the decades? If so, how does it manifest?
+14. What is the earliest date of a stock split recorded in the dataset, and what is the most recent date?
+15. How do the number of stock splits correlate with market conditions or economic events, as indicated by the timing of the splits?
+16. Are there any anomalies in the dataset, such as unusual stock split ratios or dates that stand out?
+17. How many stock splits occurred during recessions or significant economic downturns, if identifiable from the dates?
+18. What are the possible implications of a particular stock split ratio on shareholder value, and how can that be analyzed within this dataset?
+19. Are there trends in the size of the stock split ratios changing over the years (e.g., larger split ratios in earlier years vs. recent years)?
+20. What factors might contribute to the decision-making process for the timing of stock splits as represented in this dataset?
+
+--- Questions for NFLX_stock_price.csv ---
+1. What is the overall trend of the closing prices of Netflix stock over the provided time period?
+2. Which date has the highest recorded closing price, and what were the corresponding open, high, low prices, and volume on that date?
+3. How does the trading volume fluctuate over time, and are there specific dates with unusually high trading volumes?
+4. Can we identify any seasonal trends in Netflix's stock price fluctuations?
+5. What is the percentage change in the closing price over the entire dataset period?
+6. Are there any significant drop or rise days in the closing price, and what were the corresponding trading volumes on those days?
+7. How often does the stock price close higher than it opened on a daily basis?
+8. Is there a pattern in the daily price movement (ranges between high and low prices) over the dataset period?
+9. What is the average daily volume of shares traded across the entire dataset?
+10. How does the average closing price vary between different months within the dataset?
+11. Are there specific dates where the opening price deviated significantly from the closing price?
+12. How does the low price on a typical day correlate with the closing price?
+13. Is there a relationship between high trading volume and increases in stock price?
+14. What was the lowest closing price recorded in the dataset, and how does that compare to the average closing price?
+15. Are there instances where the closing price has stayed the same for several consecutive days?
+16. How frequently does the stock price reach new highs compared to how frequently it dips below previous lows?
+17. What is the moving average of closing prices over a period of 10 days, and how does this help in identifying trends?
+18. How does the distribution of open prices compare to that of closing prices throughout the dataset?
+19. Are there noticeable correlations between high prices and volumes traded that merit further investigation?
+20. Can we predict future price movements based on identified patterns within the past closing prices?
+
+--- Questions for NFLX_stock_split.csv ---
+1. What is the total number of stock splits recorded in the dataset?
+2. How many years did stock splits occur in, based on the dataset's date range?
+3. What is the frequency of stock splits per year?
+4. Can we identify any patterns in the timing of stock splits (e.g., specific months or quarters)?
+5. What are the unique stock split ratios recorded in the dataset?
+6. How many stock splits have ratios of 2:1 or greater?
+7. What is the average stock split ratio across all the recorded splits?
+8. Are there any anomalies in the dates of stock splits that warrant further investigation?
+9. How do stock split events correlate with changes in the stock price, if stock price data were included?
+10. Can we determine if there were clusters of stock splits occurring within a short time frame?
+11. How many stock splits occurred within a specific decade, based on the dataset?
+12. What is the minimum and maximum stock split ratio recorded?
+13. Is there any indication of increased stock split activity during certain economic conditions, such as during bull markets?
+14. How do the stock split ratios change over time within the dataset?
+15. Is there a trend in increasing or decreasing stock split ratios over the years?
+16. Can we correlate the occurrence of stock splits with company milestones, such as subscriber growth releases, based on available dates?
+17. How many stock splits occurred after 2010 compared to before?
+18. Do any particular years show a spike in the number of stock splits?
+19. What would be the implications of these stock split events for potential investors or stockholders in Netflix?
+20. Can we visualize the frequency of stock splits over time to identify trends more effectively?
+
+--- Comparison Questions ---
+1. How do the stock split dates in the 'DIS_stock_split.csv' dataset compare to significant price changes in the 'DIS_stock_price.csv' dataset surrounding those dates?
+2. Are there noticeable price trends in 'DIS_stock_price.csv' immediately before and after stock splits recorded in 'DIS_stock_split.csv'?
+3. What are the volume trends observed in both the 'DIS_stock_price.csv' and 'NFLX_stock_price.csv' datasets in relation to their respective stock splits?
+4. How do the stock price movements in the 'NFLX_stock_price.csv' dataset correlate with the dates of stock splits found in 'NFLX_stock_split.csv'?
+5. Can we identify periods of price volatility in 'DIS_stock_price.csv' that align with stock splits listed in 'DIS_stock_split.csv'?
+6. What differences in initial stock prices are evident between 'DIS_stock_price.csv' and 'NFLX_stock_price.csv' at the earliest date entries for each stock?
+7. How do the average closing prices in the 'DIS_stock_price.csv' and 'NFLX_stock_price.csv' compare over their respective dataset timeframes?
+8. What patterns can be observed in trading volumes from 'NFLX_stock_price.csv' around the time of stock splits noted in 'NFLX_stock_split.csv'?
+9. Are there any correlations between high trading volumes in 'DIS_stock_price.csv' and upcoming stock splits from 'DIS_stock_split.csv'?
+10. Comparing the stock splits from both 'DIS_stock_split.csv' and 'NFLX_stock_split.csv', what patterns persist regarding the ratio of splits over the years?
+11. How does the performance of stock prices in 'DIS_stock_price.csv' just before a split compare with that in 'NFLX_stock_price.csv'?
+12. Can we observe any long-term effects on stock price trends in 'NFLX_stock_price.csv' that were influenced by previous stock splits in the same dataset?
+13. Conversely, how do long-term trends in 'DIS_stock_price.csv' reflect historical stock splits documented in 'DIS_stock_split.csv'?
+14. Are there any periods of consistently high or low trading activity in the 'NFLX_stock_price.csv' that correspond to the dates of stock splits in 'NFLX_stock_split.csv'?
+15. What insights can be drawn from comparing the overall price trends of both stocks, 'DIS' and 'NFLX', during the periods following each stock's respective splits?
